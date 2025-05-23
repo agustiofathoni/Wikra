@@ -1,6 +1,6 @@
 @extends('layout/main')
 
-@section('container')
+@section('content')
 <div class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="bg-white shadow-lg rounded-xl w-full max-w-sm p-8 text-center">
         <h1 class="text-2xl font-bold mb-2">Create Account</h1>

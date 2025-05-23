@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Board extends Model
 {
+     protected $fillable = ['title', 'description', 'user_id'];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -13,7 +15,7 @@ class Board extends Model
 
     public function lists()
     {
-        return $this->hasMany(BoardList::class);
+        return $this->hasMany(BoardList::class)->orderBy('position');
     }
 
     public function collaborators()
