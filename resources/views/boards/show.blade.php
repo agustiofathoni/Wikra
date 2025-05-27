@@ -198,9 +198,11 @@
         </div>
         <form id="viewTaskForm">
             <div class="mb-4">
+                <label class="block text-gray-700 font-medium"> Card Title</label>
                 <input type="text" id="viewTaskTitle" class="w-full border rounded p-2" readonly>
             </div>
             <div class="mb-4">
+                <label class="block text-gray-700 font-medium">Description</label>
                 <textarea id="viewTaskDescription" class="w-full border rounded p-2 h-24" readonly></textarea>
             </div>
             <div class="flex justify-end space-x-2">
