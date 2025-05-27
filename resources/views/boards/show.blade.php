@@ -58,13 +58,15 @@
                             </div>
                         </div>
                         <div class="space-y-2" data-list-id="{{ $list->id }}">
-                            @foreach($list->tasks()->orderBy('position')->get() as $task)
-                                <div class="task-item bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg p-2 cursor-pointer"
-                                    data-task-id="{{ $task->id }}"
-                                    onclick="openViewTaskModal({{ $task->id }}, '{{ $task->title }}', '{{ addslashes($task->description) }}')">
-                                    <p class="text-sm text-gray-800">{{ $task->title }}</p>
-                                </div>
-                            @endforeach
+                            <div class="task-container">
+                                @foreach($list->tasks()->orderBy('position')->get() as $task)
+                                    <div class="task-item bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg p-2 cursor-pointer mb-2"
+                                        data-task-id="{{ $task->id }}"
+                                        onclick="openViewTaskModal({{ $task->id }}, '{{ $task->title }}', '{{ addslashes($task->description) }}')">
+                                        <p class="text-sm text-gray-800">{{ $task->title }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
 
                             <button onclick="openAddTaskModal({{ $list->id }})" class="w-full text-left px-2 py-1 text-indigo-600 hover:text-indigo-800 text-sm font-medium">
                                 + Add a card
@@ -255,7 +257,7 @@
     });
 
     // Initialize Sortable
-// Replace the existing DOMContentLoaded event listener with this:
+// Update the task sorting initialization
 document.addEventListener('DOMContentLoaded', function() {
     const listsContainer = document.getElementById('listsContainer');
     if (listsContainer) {
@@ -263,43 +265,20 @@ document.addEventListener('DOMContentLoaded', function() {
         new Sortable(listsContainer, {
             animation: 150,
             draggable: '.list-item',
-            handle: '.bg-white', // area yang bisa di-drag
-            filter: '#addListButton', // elemen yang tidak bisa di-drag
+            handle: '.bg-white',
+            filter: '#addListButton',
             ghostClass: 'opacity-50',
             onEnd: function(evt) {
-                if (evt.oldIndex === evt.newIndex) return;
-
-                const lists = Array.from(document.querySelectorAll('.list-item'))
-                    .map(el => parseInt(el.dataset.listId));
-
-                fetch('/lists/reorder', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ lists })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.success) {
-                        throw new Error('Failed to reorder lists');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+                // ... existing list sorting code ...
             }
         });
 
         // Initialize task sorting for each list
-        document.querySelectorAll('[data-list-id] .space-y-2').forEach(taskContainer => {
+        document.querySelectorAll('[data-list-id] .task-container').forEach(taskContainer => {
             new Sortable(taskContainer, {
                 group: 'shared-tasks',
                 animation: 150,
                 draggable: '.task-item',
-                filter: 'button',
                 ghostClass: 'opacity-50',
                 onEnd: function(evt) {
                     if (evt.from === evt.to && evt.oldIndex === evt.newIndex) return;
@@ -308,6 +287,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     const newListId = evt.to.closest('[data-list-id]').dataset.listId;
                     const tasks = Array.from(evt.to.querySelectorAll('.task-item'))
                         .map(el => parseInt(el.dataset.taskId));
+
+                    // Ensure task is placed before the "Add card" button
+                    const addButton = evt.to.closest('[data-list-id]').querySelector('button');
+                    if (addButton && evt.item.nextElementSibling === addButton) {
+                        evt.to.insertBefore(evt.item, addButton);
+                    }
 
                     fetch('/tasks/reorder', {
                         method: 'PUT',
