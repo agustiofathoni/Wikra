@@ -258,6 +258,7 @@
 
     // Initialize Sortable
 // Update the task sorting initialization
+// Replace all Sortable initialization code with this single implementation
 document.addEventListener('DOMContentLoaded', function() {
     const listsContainer = document.getElementById('listsContainer');
     if (listsContainer) {
@@ -269,13 +270,35 @@ document.addEventListener('DOMContentLoaded', function() {
             filter: '#addListButton',
             ghostClass: 'opacity-50',
             onEnd: function(evt) {
-                // ... existing list sorting code ...
+                if (evt.oldIndex === evt.newIndex) return;
+
+                const lists = Array.from(document.querySelectorAll('.list-item'))
+                    .map(el => parseInt(el.dataset.listId));
+
+                fetch('/lists/reorder', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ lists })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        throw new Error('Failed to reorder lists');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
             }
         });
 
         // Initialize task sorting for each list
-        document.querySelectorAll('[data-list-id] .task-container').forEach(taskContainer => {
-            new Sortable(taskContainer, {
+        function initializeTaskSortable(container) {
+            new Sortable(container, {
                 group: 'shared-tasks',
                 animation: 150,
                 draggable: '.task-item',
@@ -287,12 +310,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     const newListId = evt.to.closest('[data-list-id]').dataset.listId;
                     const tasks = Array.from(evt.to.querySelectorAll('.task-item'))
                         .map(el => parseInt(el.dataset.taskId));
-
-                    // Ensure task is placed before the "Add card" button
-                    const addButton = evt.to.closest('[data-list-id]').querySelector('button');
-                    if (addButton && evt.item.nextElementSibling === addButton) {
-                        evt.to.insertBefore(evt.item, addButton);
-                    }
 
                     fetch('/tasks/reorder', {
                         method: 'PUT',
@@ -318,10 +335,28 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 }
             });
+        }
+
+        // Initialize existing task containers
+        document.querySelectorAll('[data-list-id] .task-container').forEach(initializeTaskSortable);
+
+        // Create a MutationObserver to watch for new task containers
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.classList && node.classList.contains('task-container')) {
+                        initializeTaskSortable(node);
+                    }
+                });
+            });
         });
+
+        // Start observing the lists container
+        observer.observe(listsContainer, { childList: true, subtree: true });
     }
 });
 
+// Remove the duplicate Sortable initialization code that was at the bottom
 function openAddTaskModal(listId) {
     document.getElementById('taskModalTitle').textContent = 'Add Card';
     document.getElementById('taskForm').action = '/tasks';
@@ -337,35 +372,35 @@ function closeTaskModal() {
 }
 
 // Add to your DOMContentLoaded event listener
-document.querySelectorAll('.task-item').forEach(taskEl => {
-    new Sortable(taskEl.parentElement, {
-        group: 'tasks',
-        animation: 150,
-        draggable: '.task-item',
-        ghostClass: 'opacity-50',
-        onEnd: function(evt) {
-            const taskId = evt.item.dataset.taskId;
-            const newListId = evt.to.closest('[data-list-id]').dataset.listId;
-            const tasks = Array.from(evt.to.querySelectorAll('[data-task-id]'))
-                .map(el => parseInt(el.dataset.taskId));
+// document.querySelectorAll('.task-item').forEach(taskEl => {
+//     new Sortable(taskEl.parentElement, {
+//         group: 'tasks',
+//         animation: 150,
+//         draggable: '.task-item',
+//         ghostClass: 'opacity-50',
+//         onEnd: function(evt) {
+//             const taskId = evt.item.dataset.taskId;
+//             const newListId = evt.to.closest('[data-list-id]').dataset.listId;
+//             const tasks = Array.from(evt.to.querySelectorAll('[data-task-id]'))
+//                 .map(el => parseInt(el.dataset.taskId));
 
-            fetch('/tasks/reorder', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    task_id: taskId,
-                    list_id: newListId,
-                    tasks: tasks
-                })
-            })
-            .catch(error => console.error('Error:', error));
-        }
-    });
-});
+//             fetch('/tasks/reorder', {
+//                 method: 'PUT',
+//                 headers: {
+//                     'Content-Type': 'application/json',
+//                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+//                     'Accept': 'application/json'
+//                 },
+//                 body: JSON.stringify({
+//                     task_id: taskId,
+//                     list_id: newListId,
+//                     tasks: tasks
+//                 })
+//             })
+//             .catch(error => console.error('Error:', error));
+//         }
+//     });
+// });
 
 // Add these functions to your existing script section
 function openViewTaskModal(taskId, title, description) {
