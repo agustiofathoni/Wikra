@@ -22,7 +22,6 @@ class TaskController extends Controller
         try {
             $list = BoardList::findOrFail($validated['list_id']);
             $maxPosition = $list->tasks()->max('position') ?? 0;
-
             $task = new Task();
             $task->title = $validated['title'];
             $task->description = $validated['description'];
