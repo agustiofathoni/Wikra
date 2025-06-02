@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Collaborator extends Model
 {
+    protected $fillable = ['board_id', 'user_id', 'status'];
     public function board()
     {
         return $this->belongsTo(Board::class);

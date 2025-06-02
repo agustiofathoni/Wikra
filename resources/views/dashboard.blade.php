@@ -55,7 +55,49 @@
             @empty
                 <p class="text-gray-500">You haven't created any boards yet.</p>
             @endforelse
+
         </div>
+        <!-- Board Collaborator Section -->
+@if($collaboratorBoards->count())
+    <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-4">🤝 Board Collaborator</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10">
+        @foreach($collaboratorBoards as $board)
+            <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-green-500">
+                <h2 class="text-xl font-semibold text-gray-900 truncate">{{ $board->title }}</h2>
+                <p class="text-gray-600 text-sm mb-2">Owner: {{ $board->user->name }}</p>
+                @if($board->description)
+                    <p class="text-gray-600 mb-2 line-clamp-2">{{ $board->description }}</p>
+                @endif
+                <div class="mt-4 flex justify-between items-center text-sm text-gray-600">
+                    <a href="{{ route('boards.show', $board) }}" class="text-green-600 font-medium hover:underline">Open</a>
+                </div>
+            </div>
+        @endforeach
+    </div>
+@endif
+
+<!-- Invitation Section -->
+@if($pendingInvites->count())
+    <h2 class="text-2xl font-bold text-gray-800 mt-8 mb-4">📨 Board Invitation</h2>
+    @foreach($pendingInvites as $collab)
+        <div class="bg-yellow-50 border p-3 rounded mb-2 flex justify-between items-center">
+            <div>
+                <div class="font-semibold">{{ $collab->board->title }}</div>
+                <div class="text-xs text-gray-500">From: {{ $collab->board->user->name }}</div>
+            </div>
+            <div class="flex gap-2">
+                <form action="{{ route('collaborators.approve', $collab) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="text-green-600 font-semibold">Setujui</button>
+                </form>
+                <form action="{{ route('collaborators.decline', $collab) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="text-red-600 font-semibold">Tolak</button>
+                </form>
+            </div>
+        </div>
+    @endforeach
+@endif
     </div>
 </div>
 
@@ -103,6 +145,7 @@
         </form>
     </div>
 </div>
+
 
 <script>
 function openCreateBoardModal() {

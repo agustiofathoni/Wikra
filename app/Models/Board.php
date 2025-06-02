@@ -18,8 +18,8 @@ class Board extends Model
         return $this->hasMany(BoardList::class)->orderBy('position');
     }
 
-    public function collaborators()
+   public function collaborators()
     {
-        return $this->belongsToMany(User::class, 'collaborators');
+        return $this->hasMany(Collaborator::class);
     }
 }

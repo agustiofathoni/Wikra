@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BoardCollaboratorController;
 use App\Http\Controllers\BoardController;
 use App\Http\Controllers\BoardListController;
 use App\Http\Controllers\TaskController;
@@ -50,4 +51,10 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/tasks/reorder', [TaskController::class, 'reorder'])->name('tasks.reorder');
     Route::put('/tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
     Route::delete('/tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
+
+    // Collaborator routes
+    Route::post('/boards/{board}/invite', [BoardCollaboratorController::class, 'invite'])->name('boards.invite');
+    Route::post('/collaborators/{collaborator}/approve', [BoardCollaboratorController::class, 'approve'])->name('collaborators.approve');
+    Route::post('/collaborators/{collaborator}/decline', [BoardCollaboratorController::class, 'decline'])->name('collaborators.decline');
+    Route::delete('/boards/{board}/collaborators/{collaborator}', [BoardCollaboratorController::class, 'remove'])->name('collaborators.remove');
 });

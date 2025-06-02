@@ -16,15 +16,41 @@ class BoardController extends Controller
 
     public function index()
     {
-        $boards = Auth::user()->boards;
-        return view('dashboard', compact('boards'));
+       $user = Auth::user();
+
+        // My Boards (yang dibuat user)
+        $boards = $user->boards;
+
+        // Board Collaborator (user sebagai kolaborator dan sudah accepted)
+        $collaboratorBoards = \App\Models\Board::whereHas('collaborators', function($q) use ($user) {
+            $q->where('user_id', $user->id)->where('status', 'accepted');
+        })->get();
+
+        // Board Invitation (undangan pending)
+        $pendingInvites = \App\Models\Collaborator::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->with('board.user')
+            ->get();
+
+        return view('dashboard', compact('boards', 'collaboratorBoards', 'pendingInvites'));
     }
 
     public function show(Board $board)
     {
-        if ($board->user_id !== Auth::id()) {
+         $user = Auth::user();
+
+    // Izinkan jika owner atau kolaborator accepted
+        $isOwner = $board->user_id === $user->id;
+        $isCollaborator = $board->collaborators()
+            ->where('user_id', $user->id)
+            ->where('status', 'accepted')
+            ->exists();
+
+        if (!($isOwner || $isCollaborator)) {
             abort(403);
         }
+        $board->load(['collaborators.user']);
+        // ...lanjutkan load data board...
         return view('boards.show', compact('board'));
     }
 

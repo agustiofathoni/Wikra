@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('board_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->timestamps(); // created_at & updated_at
+            $table->enum('status', ['pending', 'accepted', 'declined'])->default('pending');
+            $table->timestamps();
+            $table->unique(['board_id', 'user_id']);
         });
     }
 
