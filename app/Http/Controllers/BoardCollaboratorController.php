@@ -17,27 +17,40 @@ class BoardCollaboratorController extends Controller
 
         $user = User::where('email', $request->email)->first();
         if (!$user) {
-           return redirect()
-            ->route('boards.show', [$board, 'invite' => 1])
-            ->with('error', 'Email tidak ditemukan.');
+            return redirect()
+                ->route('boards.show', [$board, 'invite' => 1])
+                ->with('error', 'Email tidak ditemukan.');
         }
 
         if ($user->id == $board->user_id) {
             return back()->with('error', 'Tidak bisa mengundang diri sendiri.');
         }
 
-        $collab = Collaborator::firstOrCreate(
-            ['board_id' => $board->id, 'user_id' => $user->id],
-            ['status' => 'pending']
-        );
+        // Cek apakah sudah pernah diundang
+        $collab = Collaborator::where('board_id', $board->id)
+            ->where('user_id', $user->id)
+            ->first();
 
-        if ($collab->wasRecentlyCreated) {
-
-            return redirect()
-            ->route('boards.show', [$board, 'invite' => 1])
-            ->with('success', 'Undangan berhasil dikirim.');
+        if ($collab) {
+            if ($collab->status === 'declined') {
+                // Update status jadi pending jika sebelumnya declined
+                $collab->update(['status' => 'pending']);
+                return redirect()
+                    ->route('boards.show', [$board, 'invite' => 1])
+                    ->with('success', 'Undangan berhasil dikirim ulang.');
+            } else {
+                return back()->with('error', 'User sudah diundang atau sudah menjadi kolaborator.');
+            }
         } else {
-            return back()->with('error', 'User sudah diundang atau sudah menjadi kolaborator.');
+            // Belum pernah diundang, buat baru
+            Collaborator::create([
+                'board_id' => $board->id,
+                'user_id' => $user->id,
+                'status' => 'pending'
+            ]);
+            return redirect()
+                ->route('boards.show', [$board, 'invite' => 1])
+                ->with('success', 'Undangan berhasil dikirim.');
         }
     }
 

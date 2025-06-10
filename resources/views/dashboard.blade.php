@@ -9,7 +9,7 @@
                 📋 Wikra
             </span>
             <div class="flex items-center space-x-6">
-                <span class="text-gray-700 font-medium">{{ auth()->user()->name }}</span>
+                <span class="text-sm text-gray-600">Hello, <span class="font-semibold text-indigo-600">{{ auth()->user()->name }}</span></span>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="submit" class="text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-md shadow transition">Logout</button>

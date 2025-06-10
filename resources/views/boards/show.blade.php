@@ -10,25 +10,28 @@
     <nav class="bg-white shadow-md sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <a href="{{ route('dashboard') }}" class="text-indigo-500 hover:text-indigo-700">
+                <a href="{{ route('dashboard') }}" class="text-indigo-500 hover:text-indigo-700" title="Back to Dashboard">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
                 </a>
                 <h1 class="text-2xl font-bold text-gray-800">{{ $board->title }}</h1>
             </div>
-            <div class="flex items-center gap-4">
-                <span class="text-sm text-gray-600">Created by {{ $board->user->name }}</span>
-                 @if(auth()->id() === $board->user_id)
-                <button onclick="openInviteModal()" class="text-indigo-600 hover:text-indigo-800" title="Invite Collaborator">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-6 4a4 4 0 100-8 4 4 0 000 8zm6 4v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
+            <div class="flex items-center gap-6">
+                <span class="text-sm text-gray-600">Created by <span class="font-semibold text-indigo-600">{{ $board->user->name }}</span></span>
+                @if(auth()->id() === $board->user_id)
+                <button onclick="openInviteModal()" class="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-semibold px-3 py-2 rounded transition" title="Invite Collaborator">
+                    <!-- Heroicons: User Group -->
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m13-7a4 4 0 11-8 0 4 4 0 018 0zM5 7a4 4 0 108 0 4 4 0 00-8 0z" />
                     </svg>
+                    <span>Collaborators</span>
                 </button>
                 @endif
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
-                    <button type="submit" class="text-sm text-gray-700 hover:text-red-500 font-medium">Logout</button>
+                    <button type="submit" class="text-sm text-gray-700 hover:text-red-500 font-medium px-3 py-2 rounded transition">Logout</button>
                 </form>
             </div>
         </div>
