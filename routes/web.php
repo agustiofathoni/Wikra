@@ -4,7 +4,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BoardCollaboratorController;
 use App\Http\Controllers\BoardController;
 use App\Http\Controllers\BoardListController;
+use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\TaskController;
+use App\Models\Task;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -57,4 +59,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/collaborators/{collaborator}/approve', [BoardCollaboratorController::class, 'approve'])->name('collaborators.approve');
     Route::post('/collaborators/{collaborator}/decline', [BoardCollaboratorController::class, 'decline'])->name('collaborators.decline');
     Route::delete('/boards/{board}/collaborators/{collaborator}', [BoardCollaboratorController::class, 'remove'])->name('collaborators.remove');
+
+    Route::patch('/checklists/{checklist}', [ChecklistController::class, 'update']);
+    Route::get('/tasks/{task}/checklists', [ChecklistController::class, 'index']);
+    Route::post('/tasks/{task}/checklists', [ChecklistController::class, 'store']);
+    Route::delete('/checklists/{checklist}', [ChecklistController::class, 'destroy']);
 });

@@ -17,6 +17,19 @@
                         </svg>
                     </button>
                 </form>
+                <button onclick="closeViewTaskModal()"
+                    class="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-red-100">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
             </div>
         </div>
         <form id="viewTaskForm">
@@ -28,14 +41,36 @@
                 <label class="block text-gray-700 font-medium">Description</label>
                 <textarea id="viewTaskDescription" class="w-full border rounded p-2 h-24" readonly></textarea>
             </div>
-            <div class="flex justify-end space-x-2">
-                <button type="button" onclick="closeViewTaskModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">
-                    Close
+           <div class="flex justify-end items-center gap-3 mt-6 pt-4 border-t border-gray-200">
+                <button type="button"
+                        id="cancelTaskButton"
+                        onclick="cancelTaskEdit()"
+                        class="hidden px-4 py-2 text-gray-700 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200 text-sm font-medium">
+                    Cancel
                 </button>
-                <button type="button" id="saveTaskButton" class="hidden px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <button type="button"
+                        id="saveTaskButton"
+                        class="hidden px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 text-sm font-medium">
                     Save Changes
                 </button>
             </div>
         </form>
+        <div id="checklistSection" class="mb-4 mt-6 bg-gray-50 p-4 rounded-lg">
+    <label class="block text-gray-700 font-medium mb-3">Checklist</label>
+    <ul id="checklistItems" class="space-y-2 mb-4">
+        {{-- Checklist items will be rendered here by JS --}}
+    </ul>
+    <form id="addChecklistForm" class="flex gap-2 mt-4">
+        <input type="text"
+               id="newChecklistText"
+               class="flex-1 border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+               placeholder="Add checklist item..."
+               required>
+        <button type="submit"
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+            Add
+        </button>
+    </form>
+</div>
     </div>
 </div>

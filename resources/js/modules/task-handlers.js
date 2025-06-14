@@ -1,12 +1,20 @@
+let originalTitle = '';
+let originalDescription = '';
 export function enableTaskEdit() {
     const title = document.getElementById('viewTaskTitle');
     const description = document.getElementById('viewTaskDescription');
     const saveButton = document.getElementById('saveTaskButton');
+    const cancelButton = document.getElementById('cancelTaskButton');
+
+    originalTitle = title.value;
+    originalDescription = description.value;
 
     title.removeAttribute('readonly');
     description.removeAttribute('readonly');
     title.focus();
+
     saveButton.classList.remove('hidden');
+    cancelButton.classList.remove('hidden');
     saveButton.onclick = saveTaskChanges;
 }
 
@@ -14,10 +22,24 @@ export function disableTaskEdit() {
     const title = document.getElementById('viewTaskTitle');
     const description = document.getElementById('viewTaskDescription');
     const saveButton = document.getElementById('saveTaskButton');
+    const cancelButton = document.getElementById('cancelTaskButton');
 
     title.setAttribute('readonly', true);
     description.setAttribute('readonly', true);
     saveButton.classList.add('hidden');
+    cancelButton.classList.add('hidden');
+}
+
+export function cancelTaskEdit() {
+    const title = document.getElementById('viewTaskTitle');
+    const description = document.getElementById('viewTaskDescription');
+
+    // Restore original values
+    title.value = originalTitle;
+    description.value = originalDescription;
+
+    // Return to view mode
+    disableTaskEdit();
 }
 
 export function saveTaskChanges() {
@@ -69,3 +91,5 @@ function showMessage(form, text, className) {
     form.insertBefore(message, form.firstChild);
     setTimeout(() => message.remove(), 2000);
 }
+
+window.cancelTaskEdit = cancelTaskEdit;
