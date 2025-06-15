@@ -35,14 +35,11 @@ class TaskController extends Controller
             broadcast(new TaskCreated($task))->toOthers();
             DB::commit();
 
-        return response()->json([
-            'success' => true,
-            'task' => $task
-        ]);
-        } catch (\Exception $e) {
-            DB::rollback();
-            return back()->with('error', 'Failed to add card');
-        }
+        return response()->json(['success' => true, 'task' => $task]);
+         } catch (\Exception $e) {
+             DB::rollback();
+             return back()->with('error', 'Failed to add card');
+         }
     }
 
     public function reorder(Request $request)

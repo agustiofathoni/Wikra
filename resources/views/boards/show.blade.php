@@ -107,16 +107,16 @@
             <h2 class="text-xl font-bold">Invite Collaborator</h2>
             <button onclick="closeInviteModal()" class="text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
         </div>
-        @if(session('error'))
-            <div class="bg-red-100 text-red-700 px-3 py-2 rounded mb-2 text-sm">
-                {{ session('error') }}
-            </div>
-        @endif
-        @if(session('success'))
-            <div class="bg-green-100 text-green-700 px-3 py-2 rounded mb-2 text-sm">
-                {{ session('success') }}
-            </div>
-        @endif
+            @if(session('invite_error'))
+                <div class="bg-red-100 text-red-700 px-3 py-2 rounded mb-2 text-sm">
+                    {{ session('invite_error') }}
+                </div>
+            @endif
+            @if(session('invite_success'))
+                <div class="bg-green-100 text-green-700 px-3 py-2 rounded mb-2 text-sm">
+                    {{ session('invite_success') }}
+                </div>
+            @endif
         <form action="{{ route('boards.invite', $board) }}" method="POST" class="mb-4 flex gap-2">
             @csrf
             <input type="email" name="email" placeholder="Invite by email" required class="border rounded p-2 flex-1">
@@ -154,7 +154,7 @@ function openInviteModal() {
 function closeInviteModal() {
     document.getElementById('inviteModal').classList.add('hidden');
 }
-@if(request('invite') == 1 && (session('error') || session('success')))
+@if(request('invite') == 1 && (session('invite_error') || session('invite_success')))
     window.addEventListener('DOMContentLoaded', function() {
         openInviteModal();
     });

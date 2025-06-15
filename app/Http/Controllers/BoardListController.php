@@ -34,7 +34,7 @@ class BoardListController extends Controller
             broadcast(new ListCreated($list))->toOthers();
 
             DB::commit();
-            return redirect()->route('boards.show', $board)->with('success', 'List created successfully');
+            return redirect()->route('boards.show', $board)->with('list_success', 'List created successfully');
         } catch (\Exception $e) {
             DB::rollback();
             return back()->with('error', 'Failed to create list');
@@ -52,7 +52,7 @@ class BoardListController extends Controller
         // Broadcast event
         broadcast(new ListUpdated($list))->toOthers();
 
-        return redirect()->back()->with('success', 'List updated successfully');
+         return redirect()->back()->with('list_success', 'List updated successfully');
     }
 
     public function destroy(BoardList $list)
@@ -65,7 +65,7 @@ class BoardListController extends Controller
         // Broadcast event
         broadcast(new ListDeleted($listId, $boardId))->toOthers();
 
-        return redirect()->route('boards.show', $board)->with('success', 'List deleted successfully');
+        return redirect()->route('boards.show', $board)->with('list_success', 'List deleted successfully');
     }
 
     public function reorder(Request $request)

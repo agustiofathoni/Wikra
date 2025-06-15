@@ -19,11 +19,13 @@ class BoardCollaboratorController extends Controller
         if (!$user) {
             return redirect()
                 ->route('boards.show', [$board, 'invite' => 1])
-                ->with('error', 'Email tidak ditemukan.');
+                ->with('invite_error', 'Email tidak ditemukan.');
         }
 
         if ($user->id == $board->user_id) {
-            return back()->with('error', 'Tidak bisa mengundang diri sendiri.');
+            return redirect()
+                ->route('boards.show', [$board, 'invite' => 1])
+                ->with('invite_error', 'Tidak bisa mengundang diri sendiri.');
         }
 
         // Cek apakah sudah pernah diundang
@@ -33,25 +35,27 @@ class BoardCollaboratorController extends Controller
 
         if ($collab) {
             if ($collab->status === 'declined') {
-                // Update status jadi pending jika sebelumnya declined
                 $collab->update(['status' => 'pending']);
                 return redirect()
                     ->route('boards.show', [$board, 'invite' => 1])
-                    ->with('success', 'Undangan berhasil dikirim ulang.');
+                    ->with('invite_success', 'Undangan berhasil dikirim ulang.');
             } else {
-                return back()->with('error', 'User sudah diundang atau sudah menjadi kolaborator.');
+                return redirect()
+                    ->route('boards.show', [$board, 'invite' => 1])
+                    ->with('invite_error', 'User sudah diundang atau sudah menjadi kolaborator.');
             }
-        } else {
+        }
+         else {
             // Belum pernah diundang, buat baru
             Collaborator::create([
                 'board_id' => $board->id,
                 'user_id' => $user->id,
                 'status' => 'pending'
             ]);
-            return redirect()
+             return redirect()
                 ->route('boards.show', [$board, 'invite' => 1])
-                ->with('success', 'Undangan berhasil dikirim.');
-        }
+                ->with('invite_success', 'Invitation sent successfully.');
+                }
     }
 
     // Approve invitation
@@ -73,8 +77,12 @@ class BoardCollaboratorController extends Controller
     // Remove collaborator (hanya owner board)
     public function remove(Board $board, Collaborator $collaborator)
     {
-        $this->authorize('update', $board); // hanya owner
+       $this->authorize('delete', $collaborator);
+
         $collaborator->delete();
-        return back()->with('success', 'Kolaborator dihapus.');
-    }
+
+       return redirect()
+        ->route('boards.show', [$board, 'invite' => 1])
+        ->with('invite_success', 'Collaborator removed successfully.');
+        }
 }

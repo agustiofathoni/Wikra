@@ -45,6 +45,15 @@ class CollaboratorPolicy
      */
     public function delete(User $user, Collaborator $collaborator): bool
     {
+          // Allow board owner to delete any collaborator
+        if ($user->id === $collaborator->board->user_id) {
+            return true;
+        }
+
+        // Allow invited user to delete their own pending invitation
+        if ($collaborator->status === 'pending' && $user->id === $collaborator->user_id) {
+            return true;
+        }
         return false;
     }
 
