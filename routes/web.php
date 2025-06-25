@@ -59,6 +59,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/collaborators/{collaborator}/approve', [BoardCollaboratorController::class, 'approve'])->name('collaborators.approve');
     Route::post('/collaborators/{collaborator}/decline', [BoardCollaboratorController::class, 'decline'])->name('collaborators.decline');
     Route::delete('/boards/{board}/collaborators/{collaborator}', [BoardCollaboratorController::class, 'remove'])->name('collaborators.remove');
+    Route::patch('/boards/{board}/collaborators/{collaborator}/role', [BoardCollaboratorController::class, 'updateRole'])
+        ->name('collaborators.updateRole');
 
     Route::patch('/checklists/{checklist}', [ChecklistController::class, 'update']);
     Route::get('/tasks/{task}/checklists', [ChecklistController::class, 'index']);

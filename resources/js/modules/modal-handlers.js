@@ -13,12 +13,16 @@ function loadChecklist(taskId) {
             items.forEach(item => {
                 const li = document.createElement('li');
                 li.classList.add('mb-2', 'bg-white', 'rounded-md', 'p-2', 'shadow-sm');
+
+                // Cek role
+                const canEdit = window.isOwner || window.myRole === 'edit';
+
                 li.innerHTML = `
                     <label class="flex items-center justify-between gap-2 w-full">
                         <div class="flex items-center gap-2 flex-1">
                             <input type="checkbox" ${item.is_completed ? 'checked' : ''}
                                    class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                   onchange="toggleChecklist(${item.id}, this.checked)">
+                                   ${canEdit ? `onchange="toggleChecklist(${item.id}, this.checked)"` : 'disabled'}>
                             <span id="checklist-text-${item.id}"
                                   class="flex-1 text-sm ${item.is_completed ? 'line-through text-gray-400' : 'text-gray-700'}">${item.item_text}</span>
                             <input id="edit-checklist-input-${item.id}"
@@ -26,36 +30,38 @@ function loadChecklist(taskId) {
                                    value="${item.item_text}" />
                         </div>
                         <div class="flex items-center gap-1">
-                            <!-- Edit Icon -->
-                            <button type="button" onclick="showEditChecklist(${item.id})"
-                                    class="text-gray-400 hover:text-blue-500 transition-colors p-1 rounded-full hover:bg-gray-100">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                                </svg>
-                            </button>
-                            <!-- Delete Icon -->
-                            <button type="button" onclick="deleteChecklist(${item.id})"
-                                    class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-gray-100">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m6.5 0a48.667 48.667 0 00-7.5 0" />
-                                </svg>
-                            </button>
-                            <!-- Save Icon (Hidden by default) -->
+                            ${canEdit ? `
+                           <!-- Edit Icon -->
+                                <button type="button" onclick="showEditChecklist(${item.id})"
+                                        class="text-gray-400 hover:text-blue-500 transition-colors p-1 rounded-full hover:bg-gray-100">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                                <!-- Delete Icon -->
+                                <button type="button" onclick="deleteChecklist(${item.id})"
+                                        class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-gray-100">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                           <!-- Save Icon (Hidden by default) -->
                             <button type="button" id="save-edit-btn-${item.id}"
                                     onclick="saveEditChecklist(${item.id}, event)"
                                     class="hidden text-gray-400 hover:text-green-500 transition-colors p-1 rounded-full hover:bg-gray-100">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                             </button>
                             <!-- Cancel Icon (Hidden by default) -->
                             <button type="button" id="cancel-edit-btn-${item.id}"
                                     onclick="cancelEditChecklist(${item.id}, '${item.item_text.replace(/'/g, "\\'")}')"
                                     class="hidden text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
+                            ` : ''}
                         </div>
                     </label>
                 `;
@@ -66,7 +72,6 @@ function loadChecklist(taskId) {
             console.error('Error loading checklists:', error);
         });
 }
-
 
 
 function toggleChecklist(id, checked) {
@@ -176,16 +181,20 @@ window.saveEditChecklist = function(id, event) {
     });
 };
 export function openViewTaskModal(taskId, title, description) {
+    window.currentTaskId = taskId;
     const modal = document.getElementById('viewTaskModal');
     const form = document.getElementById('viewTaskForm');
     const deleteForm = document.getElementById('deleteTaskForm');
 
 
-
     document.getElementById('viewTaskTitle').value = title;
     document.getElementById('viewTaskDescription').value = description;
-    deleteForm.action = `/tasks/${taskId}`;
-    form.dataset.taskId = taskId;
+   if (deleteForm) {
+        deleteForm.action = `/tasks/${taskId}`;
+    }
+    if (form) {
+        form.dataset.taskId = taskId;
+    }
     disableTaskEdit();
     modal.classList.remove('hidden');
 

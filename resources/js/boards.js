@@ -7,7 +7,9 @@ const boardId = boardIdMeta ? boardIdMeta.content : null;
 
 // Initialize event listeners
 document.addEventListener('DOMContentLoaded', () => {
-    initializeSortable();
+     if (window.isOwner || window.myRole === 'edit') {
+        initializeSortable();
+    }
 
     // Modal event listeners
     document.querySelectorAll('#createListModal, #editListModal').forEach(modal => {

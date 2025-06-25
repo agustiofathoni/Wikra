@@ -1,3 +1,4 @@
+
 export function initializeSortable() {
     const listsContainer = document.getElementById('listsContainer');
     if (!listsContainer) return;
