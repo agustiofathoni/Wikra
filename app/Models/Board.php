@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory; 
 
 class Board extends Model
 {
-     protected $fillable = ['title', 'description', 'user_id'];
+    use HasFactory;
+
+    protected $fillable = ['title', 'description', 'user_id'];
 
     public function user()
     {
@@ -18,7 +21,7 @@ class Board extends Model
         return $this->hasMany(BoardList::class)->orderBy('position');
     }
 
-   public function collaborators()
+    public function collaborators()
     {
         return $this->hasMany(Collaborator::class);
     }
