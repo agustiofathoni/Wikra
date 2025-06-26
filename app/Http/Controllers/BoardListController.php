@@ -6,12 +6,14 @@ use App\Events\ListCreated;
 use App\Events\ListDeleted;
 use App\Events\ListReordered;
 use App\Events\ListUpdated;
+use App\Models\ActivityLog;
 use App\Models\Board;
 use App\Models\BoardList;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class BoardListController extends Controller
 {
@@ -32,7 +34,16 @@ class BoardListController extends Controller
             $list->save();
 
             broadcast(new ListCreated($list))->toOthers();
-
+             // Tambahkan activity log di sini
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'board_id' => $board->id,
+                'action' => 'create_list',
+                'target_type' => \App\Models\BoardList::class,
+                'target_id' => $list->id,
+                'description' => 'List "' . $list->name . '" created in board "' . $board->title . '"',
+                'created_at' => now(),
+            ]);
             DB::commit();
             return redirect()->route('boards.show', $board)->with('list_success', 'List created successfully');
         } catch (\Exception $e) {
@@ -47,12 +58,27 @@ class BoardListController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
+        $oldName = $list->name;
+        $board = $list->board;
+
         $list->update($validated);
 
         // Broadcast event
         broadcast(new ListUpdated($list))->toOthers();
 
-         return redirect()->back()->with('list_success', 'List updated successfully');
+        // Tambahkan activity log
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'board_id' => $board->id,
+            'action' => 'update_list',
+            'target_type' => \App\Models\BoardList::class,
+            'target_id' => $list->id,
+            'description' => 'List diubah dari "' . $oldName . '" menjadi "' . $list->name . '" pada board "' . $board->title . '"',
+            'created_at' => now(),
+        ]);
+
+
+        return redirect()->back()->with('list_success', 'List updated successfully');
     }
 
     public function destroy(BoardList $list)
@@ -60,11 +86,22 @@ class BoardListController extends Controller
         $board = $list->board;
         $listId = $list->id;
         $boardId = $board->id;
-        $list->delete();
+        $listName = $list->name;
+
 
         // Broadcast event
         broadcast(new ListDeleted($listId, $boardId))->toOthers();
-
+        // Tambahkan activity log
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'board_id' => $board->id,
+            'action' => 'delete_list',
+            'target_type' => \App\Models\BoardList::class,
+            'target_id' => $listId,
+            'description' => 'List "' . $listName . '" dihapus dari board "' . $board->title . '"',
+            'created_at' => now(),
+        ]);
+        $list->delete();
         return redirect()->route('boards.show', $board)->with('list_success', 'List deleted successfully');
     }
 
@@ -101,9 +138,20 @@ class BoardListController extends Controller
                     ];
                 })
                 ->toArray();
-            // --- SAMPAI SINI ---
 
-            // Broadcast event
+
+            if ($boardId) {
+                ActivityLog::create([
+                    'user_id' => Auth::id(),
+                    'board_id' => $boardId,
+                    'action' => 'reorder_list',
+                    'target_type' => \App\Models\Board::class,
+                    'target_id' => $boardId,
+                    'description' => 'Urutan list diubah pada board "' . ($firstList->board->title ?? '-') . '"',
+                    'created_at' => now(),
+                ]);
+            }
+             // Broadcast event
             if ($boardId) {
                 broadcast(new ListReordered($boardId, $lists))->toOthers();
             }

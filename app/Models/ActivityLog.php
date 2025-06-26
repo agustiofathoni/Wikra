@@ -8,10 +8,15 @@ class ActivityLog extends Model
 {
     public $timestamps = false;
 
-    protected $fillable = ['user_id', 'action', 'target_type', 'target_id', 'created_at'];
+    protected $fillable = ['user_id', 'board_id', 'action', 'target_type', 'target_id', 'description', 'created_at'];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+     public function target()
+    {
+        return $this->morphTo(null, 'target_type', 'target_id');
     }
 }

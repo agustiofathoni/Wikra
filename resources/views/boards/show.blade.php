@@ -10,6 +10,7 @@
     $acceptedCollab = $board->collaborators->where('user_id', auth()->id())->where('status', 'accepted')->first();
     $myRole = $isOwner ? 'owner' : ($acceptedCollab ? $acceptedCollab->role : null);
 @endphp
+
 <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
     <!-- Navbar -->
     <nav class="bg-white shadow-md sticky top-0 z-40">
@@ -38,6 +39,9 @@
                     @csrf
                     <button type="submit" class="text-sm text-gray-700 hover:text-red-500 font-medium px-3 py-2 rounded transition">Logout</button>
                 </form>
+                 <button onclick="showActivityLog()" class="bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-700">
+                Activity Log
+            </button>
             </div>
         </div>
     </nav>
@@ -120,6 +124,7 @@
             @endif
         </div>
     </div>
+</div>
 </div>
 
 <!-- Confirm Delete List Modal -->
@@ -311,9 +316,19 @@ function openConfirmDeleteTaskModal(taskId) {
 function closeConfirmDeleteTaskModal() {
     document.getElementById('confirmDeleteTaskModal').classList.add('hidden');
 }
+function showActivityLog() {
+    document.getElementById('activityLogSidebar').style.transform = 'translateX(0)';
+}
+function hideActivityLog() {
+    document.getElementById('activityLogSidebar').style.transform = 'translateX(100%)';
+}
+window.addEventListener('DOMContentLoaded', function() {
+    hideActivityLog(); // Hide by default
+});
 </script>
     <x-modal.create-list :board="$board" />
     <x-modal.edit-list />
     <x-modal.add-task />
     <x-modal.view-task :board="$board" />
+    <x-activity-log :activities="$activities" />
 @endsection

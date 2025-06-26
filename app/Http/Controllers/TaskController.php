@@ -6,10 +6,12 @@ use App\Events\TaskCreated;
 use App\Events\TaskDeleted;
 use App\Events\TaskReordered;
 use App\Events\TaskUpdated;
+use App\Models\ActivityLog;
 use App\Models\Task;
 use App\Models\BoardList;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class TaskController extends Controller
@@ -32,6 +34,17 @@ class TaskController extends Controller
             $task->list_id = $validated['list_id'];
             $task->position = $maxPosition + 1;
             $task->save();
+
+              // Activity log
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'board_id' => $list->board_id,
+                'action' => 'create_task',
+                'target_type' => Task::class,
+                'target_id' => $task->id,
+                'description' => 'Card "' . $task->title . '" dibuat pada list "' . $list->name . '"',
+                'created_at' => now(),
+            ]);
             broadcast(new TaskCreated($task))->toOthers();
             DB::commit();
 
@@ -70,6 +83,16 @@ class TaskController extends Controller
 
             // Broadcast event
             $boardId = $task->list->board_id;
+             // Activity log
+            ActivityLog::create([
+                'user_id' => Auth::id(),
+                'board_id' => $boardId,
+                'action' => 'reorder_task',
+                'target_type' => \App\Models\BoardList::class,
+                'target_id' => $validated['list_id'],
+                'description' => 'Urutan card diubah pada list "' . $task->list->name . '"',
+                'created_at' => now(),
+            ]);
             broadcast(new TaskReordered($validated['list_id'], $tasks, $boardId))->toOthers();
 
             DB::commit();
@@ -88,7 +111,18 @@ class TaskController extends Controller
         ]);
 
         try {
+            $oldTitle = $task->title;
             $task->update($validated);
+
+             ActivityLog::create([
+                'user_id' => Auth::id(),
+                'board_id' => $task->list->board_id,
+                'action' => 'update_task',
+                'target_type' => Task::class,
+                'target_id' => $task->id,
+                'description' => 'Card diubah dari "' . $oldTitle . '" menjadi "' . $task->title . '" pada list "' . $task->list->name . '"',
+                'created_at' => now(),
+            ]);
 
             // Broadcast event
             broadcast(new TaskUpdated($task))->toOthers();
@@ -105,6 +139,17 @@ class TaskController extends Controller
             $listId = $task->list_id;
             $boardId = $task->list->board_id;
             $taskId = $task->id;
+            $taskTitle = $task->title;
+            $listName = $task->list->name;
+             ActivityLog::create([
+                'user_id' => Auth::id(),
+                'board_id' => $boardId,
+                'action' => 'delete_task',
+                'target_type' => Task::class,
+                'target_id' => $taskId,
+                'description' => 'Card "' . $taskTitle . '" dihapus dari list "' . $listName . '"',
+                'created_at' => now(),
+            ]);
             $task->delete();
 
             // Broadcast event

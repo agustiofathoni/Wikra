@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\Board;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -50,8 +51,19 @@ class BoardController extends Controller
             abort(403);
         }
         $board->load(['collaborators.user']);
-        // ...lanjutkan load data board...
-        return view('boards.show', compact('board'));
+
+        $listIds = $board->lists()->pluck('id');
+        $taskIds = \App\Models\Task::whereIn('list_id', $listIds)->pluck('id');
+        // ------------------------
+
+       $activities = ActivityLog::with('user')
+        ->where('board_id', $board->id)
+        ->orderByDesc('created_at')
+        ->limit(20)
+        ->get();
+
+        return view('boards.show', compact('board', 'activities'));
+
     }
 
     public function store(Request $request)

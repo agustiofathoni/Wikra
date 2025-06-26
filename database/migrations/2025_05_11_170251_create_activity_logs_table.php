@@ -17,7 +17,9 @@ return new class extends Migration
             $table->string('action');
             $table->string('target_type');
             $table->unsignedBigInteger('target_id');
+            $table->text('description')->nullable();
             $table->timestamp('created_at')->useCurrent();
+            $table->index(['target_type', 'target_id']);
         });
     }
 
