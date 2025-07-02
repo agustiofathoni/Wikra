@@ -83,7 +83,7 @@ function updateTaskOrder(taskId, newListId, tasks) {
     .catch(error => console.error('Error:', error));
 }
 
-function initializeTaskContainers() {
+export function initializeTaskContainers() {
     document.querySelectorAll('[data-list-id] .task-container')
         .forEach(initializeTaskSortable);
 }

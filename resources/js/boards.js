@@ -1,6 +1,6 @@
 import * as ModalHandlers from './modules/modal-handlers.js';
 import * as TaskHandlers from './modules/task-handlers.js';
-import { initializeSortable } from './modules/sortable-init.js';
+import { initializeSortable, initializeTaskContainers } from './modules/sortable-init.js';
 
 const boardIdMeta = document.querySelector('meta[name="board-id"]');
 const boardId = boardIdMeta ? boardIdMeta.content : null;
@@ -155,6 +155,9 @@ function updateListOrderInBoard(lists) {
     if (addListButton) {
         listsContainer.appendChild(addListButton);
     }
+
+    // Re-initialize sortable for tasks in the new lists
+    initializeTaskContainers();
 }
 function prependActivityLog(activity) {
     // Render activity ke sidebar, misal:
