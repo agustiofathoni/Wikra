@@ -53,6 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (Array.isArray(e.lists)) {
             updateListOrderInBoard(e.lists);
         }
+    })
+    .listen('ActivityLogged', (e) => {
+        // Tambahkan activity ke sidebar
+        prependActivityLog(e.activity);
     });
 });
 function addListToBoard(list) {
@@ -151,6 +155,29 @@ function updateListOrderInBoard(lists) {
     if (addListButton) {
         listsContainer.appendChild(addListButton);
     }
+}
+function prependActivityLog(activity) {
+    // Render activity ke sidebar, misal:
+    const ul = document.querySelector('#activityLogList');
+    if (!ul) return;
+    // CEK: Jika sudah ada log dengan id ini, jangan tambah lagi!
+    if (document.getElementById('activity-' + activity.id)) return;
+    const li = document.createElement('li');
+    li.id = 'activity-' + activity.id; // tambahkan id unik!
+    li.className = 'py-2 text-sm text-gray-700';
+    li.innerHTML = `
+            <span class="font-semibold text-indigo-700">${activity.user?.name ?? 'Unknown'}</span>
+            melakukan <span class="font-semibold">${activity.action}</span>
+            ${activity.target_type ? 'pada <span class="italic">' + (
+                activity.target_type.endsWith('BoardList') ? 'this board'
+                : activity.target_type.endsWith('Task') ? 'card'
+                : activity.target_type.endsWith('Board') ? 'board'
+                : activity.target_type.split('\\').pop()
+            ) + '</span>' : ''}
+            <span class="text-xs text-gray-400 ml-2">${window.moment ? window.moment(activity.created_at).fromNow() : activity.created_at}</span>
+            ${activity.description ? `<div class="text-xs text-gray-500">${activity.description}</div>` : ''}
+        `;
+        ul.prepend(li);
 }
 // Make functions globally available
 window.openCreateListModal = ModalHandlers.openCreateListModal;

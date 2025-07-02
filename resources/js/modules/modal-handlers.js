@@ -33,14 +33,14 @@ function loadChecklist(taskId) {
                             ${canEdit ? `
                            <!-- Edit Icon -->
                                 <button type="button" onclick="showEditChecklist(${item.id})"
-                                        class="text-gray-400 hover:text-blue-500 transition-colors p-1 rounded-full hover:bg-gray-100">
+                                        class="text-yellow-400 hover:text-yellow-600 transition-colors p-1 rounded-full hover:bg-gray-100">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                     </svg>
                                 </button>
                                 <!-- Delete Icon -->
                                 <button type="button" onclick="deleteChecklist(${item.id})"
-                                        class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-gray-100">
+                                        class="text-red-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-gray-100">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
@@ -48,7 +48,7 @@ function loadChecklist(taskId) {
                            <!-- Save Icon (Hidden by default) -->
                             <button type="button" id="save-edit-btn-${item.id}"
                                     onclick="saveEditChecklist(${item.id}, event)"
-                                    class="hidden text-gray-400 hover:text-green-500 transition-colors p-1 rounded-full hover:bg-gray-100">
+                                    class="hidden text-green-400 hover:text-green-500 transition-colors p-1 rounded-full hover:bg-gray-100">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
@@ -56,7 +56,7 @@ function loadChecklist(taskId) {
                             <!-- Cancel Icon (Hidden by default) -->
                             <button type="button" id="cancel-edit-btn-${item.id}"
                                     onclick="cancelEditChecklist(${item.id}, '${item.item_text.replace(/'/g, "\\'")}')"
-                                    class="hidden text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100">
+                                    class="hidden text-red-400 hover:text-red-600 transition-colors p-1 rounded-full hover:bg-gray-100">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>

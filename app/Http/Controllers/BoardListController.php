@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ActivityLogged;
 use App\Events\ListCreated;
 use App\Events\ListDeleted;
 use App\Events\ListReordered;
@@ -35,15 +36,16 @@ class BoardListController extends Controller
 
             broadcast(new ListCreated($list))->toOthers();
              // Tambahkan activity log di sini
-            ActivityLog::create([
+            $log = ActivityLog::create([
                 'user_id' => Auth::id(),
                 'board_id' => $board->id,
                 'action' => 'create_list',
-                'target_type' => \App\Models\BoardList::class,
+                'target_type' => BoardList::class,
                 'target_id' => $list->id,
                 'description' => 'List "' . $list->name . '" created in board "' . $board->title . '"',
                 'created_at' => now(),
             ]);
+            event(new \App\Events\ActivityLogged($log->id));
             DB::commit();
             return redirect()->route('boards.show', $board)->with('list_success', 'List created successfully');
         } catch (\Exception $e) {
@@ -67,7 +69,7 @@ class BoardListController extends Controller
         broadcast(new ListUpdated($list))->toOthers();
 
         // Tambahkan activity log
-        ActivityLog::create([
+        $log = ActivityLog::create([
             'user_id' => Auth::id(),
             'board_id' => $board->id,
             'action' => 'update_list',
@@ -76,6 +78,9 @@ class BoardListController extends Controller
             'description' => 'List diubah dari "' . $oldName . '" menjadi "' . $list->name . '" pada board "' . $board->title . '"',
             'created_at' => now(),
         ]);
+        if($log){
+            event(new ActivityLogged($log->id));
+        }
 
 
         return redirect()->back()->with('list_success', 'List updated successfully');
@@ -92,7 +97,7 @@ class BoardListController extends Controller
         // Broadcast event
         broadcast(new ListDeleted($listId, $boardId))->toOthers();
         // Tambahkan activity log
-        ActivityLog::create([
+        $log = ActivityLog::create([
             'user_id' => Auth::id(),
             'board_id' => $board->id,
             'action' => 'delete_list',
@@ -101,6 +106,7 @@ class BoardListController extends Controller
             'description' => 'List "' . $listName . '" dihapus dari board "' . $board->title . '"',
             'created_at' => now(),
         ]);
+        event(new ActivityLogged($log->id));
         $list->delete();
         return redirect()->route('boards.show', $board)->with('list_success', 'List deleted successfully');
     }
@@ -115,16 +121,25 @@ class BoardListController extends Controller
         try {
             DB::beginTransaction();
 
+            // Ambil data list pertama untuk dapatkan board_id
+            $firstList = BoardList::find($validated['lists'][0]);
+            $boardId = $firstList ? $firstList->board_id : null;
+
+            // Ambil urutan posisi list SEBELUM update
+            $oldOrder = BoardList::where('board_id', $boardId)
+                ->orderBy('position')
+                ->pluck('id')
+                ->toArray();
+
+            $newOrder = $validated['lists'];
+
+            // Update posisi list
             foreach ($validated['lists'] as $position => $listId) {
                 BoardList::where('id', $listId)
                         ->update(['position' => $position + 1]);
             }
 
             // Ambil data list terbaru untuk board ini, SEKALIGUS DENGAN TASKS-NYA
-            $firstList = BoardList::find($validated['lists'][0]);
-            $boardId = $firstList ? $firstList->board_id : null;
-
-            // --- GANTI BAGIAN INI ---
             $lists = BoardList::where('board_id', $boardId)
                 ->orderBy('position')
                 ->get()
@@ -140,23 +155,32 @@ class BoardListController extends Controller
                 ->toArray();
 
 
-            if ($boardId) {
-                ActivityLog::create([
+            $listNames = BoardList::whereIn('id', array_merge($oldOrder, $newOrder))
+                ->pluck('name', 'id')
+                ->toArray();
+            $oldNames = array_map(fn($id) => $listNames[$id] ?? $id, $oldOrder);
+            $newNames = array_map(fn($id) => $listNames[$id] ?? $id, $newOrder);
+            $log = null;
+            if ($oldOrder !== $newOrder) {
+                $log = ActivityLog::create([
                     'user_id' => Auth::id(),
                     'board_id' => $boardId,
                     'action' => 'reorder_list',
                     'target_type' => \App\Models\Board::class,
                     'target_id' => $boardId,
-                    'description' => 'Urutan list diubah pada board "' . ($firstList->board->title ?? '-') . '"',
+                    'description' => 'Urutan list diubah pada board "' . ($firstList->board->title ?? '-') . '". Sebelumnya: [' . implode(', ', $oldNames) . '] Menjadi: [' . implode(', ', $newNames) . ']',
                     'created_at' => now(),
                 ]);
             }
-             // Broadcast event
+
             if ($boardId) {
                 broadcast(new ListReordered($boardId, $lists))->toOthers();
             }
 
             DB::commit();
+            if ($log) {
+                event(new ActivityLogged($log->id));
+            }
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             DB::rollBack();

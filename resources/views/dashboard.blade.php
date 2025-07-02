@@ -10,10 +10,7 @@
             </span>
             <div class="flex items-center space-x-6">
                 <span class="text-sm text-gray-600">Hello, <span class="font-semibold text-indigo-600">{{ auth()->user()->name }}</span></span>
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-md shadow transition">Logout</button>
-                </form>
+                <button type="button" onclick="openConfirmLogoutModal()" class="text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-md shadow transition">Logout</button>
             </div>
         </div>
     </div>
@@ -28,9 +25,15 @@
         </div>
 
         @if(session('success'))
-            <div class="bg-green-50 border border-green-400 text-green-800 px-5 py-4 rounded-lg shadow mb-6">
+            <div id="successAlert" class="bg-green-50 border border-green-400 text-green-800 px-5 py-4 rounded-lg shadow mb-6">
                 {{ session('success') }}
             </div>
+            <script>
+                setTimeout(function() {
+                    var alert = document.getElementById('successAlert');
+                    if(alert) alert.style.display = 'none';
+                }, 3000); // 3000 ms = 3 detik
+            </script>
         @endif
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -145,8 +148,26 @@
         </form>
     </div>
 </div>
-
-
+<!-- Confirm Logout Modal -->
+<div id="confirmLogoutModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 shadow-lg max-w-sm w-full">
+        <div class="flex flex-col items-center mb-2">
+            <svg class="w-12 h-12 text-red-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <h2 class="text-lg font-bold mb-2 text-gray-800">Logout?</h2>
+        </div>
+        <p class="mb-4 text-gray-600 text-center">Apakah Anda yakin ingin keluar dari aplikasi?</p>
+        <form id="logoutForm" action="{{ route('logout') }}" method="POST">
+            @csrf
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="closeConfirmLogoutModal()" class="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300">Batal</button>
+                <button type="submit" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Logout</button>
+            </div>
+        </form>
+    </div>
+</div>
 <script>
 function openCreateBoardModal() {
     document.getElementById('createBoardModal').classList.remove('hidden');
@@ -162,6 +183,12 @@ function openEditModal(id, title, description) {
 }
 function closeEditBoardModal() {
     document.getElementById('editBoardModal').classList.add('hidden');
+}
+function openConfirmLogoutModal() {
+    document.getElementById('confirmLogoutModal').classList.remove('hidden');
+}
+function closeConfirmLogoutModal() {
+    document.getElementById('confirmLogoutModal').classList.add('hidden');
 }
 </script>
 @endsection

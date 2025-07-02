@@ -17,6 +17,7 @@ class ChecklistController extends Controller
     {
         return response()->json($task->checklists()->get());
     }
+
     public function store(Request $request, Task $task)
     {
         $request->validate([
@@ -27,15 +28,16 @@ class ChecklistController extends Controller
             'is_completed' => false,
         ]);
         // Activity log
-        ActivityLog::create([
+        $log = ActivityLog::create([
             'user_id' => Auth::id(),
             'board_id' => $task->list->board_id,
             'action' => 'create_checklist',
             'target_type' => Checklist::class,
             'target_id' => $checklist->id,
-            'description' => 'Checklist "' . $checklist->item_text . '" dibuat pada card "' . $task->title . '"',
+            'description' => 'Checklist "' . $checklist->item_text . '" dibuat pada card "' . $task->title . '" list "' . ($task->list->name ?? '-') . '"',
             'created_at' => now(),
         ]);
+        event(new \App\Events\ActivityLogged($log->id));
         broadcast(new ChecklistCreated($checklist))->toOthers();
         return response()->json($checklist);
     }
@@ -61,12 +63,12 @@ class ChecklistController extends Controller
         $task = $checklist->task;
         $desc = '';
         if ($request->has('item_text')) {
-            $desc = 'Checklist diubah dari "' . $oldText . '" menjadi "' . $checklist->item_text . '" pada card "' . $task->title . '"';
+            $desc = 'Checklist diubah dari "' . $oldText . '" menjadi "' . $checklist->item_text . '" pada card "' . $task->title . '" list "' . ($task->list->name ?? '-') . '"';
         } elseif ($request->has('is_completed')) {
-            $desc = 'Checklist "' . $checklist->item_text . '" pada card "' . $task->title . '" ' . ($checklist->is_completed ? 'diselesaikan' : 'dibuka kembali');
+            $desc = 'Checklist "' . $checklist->item_text . '" pada card "' . $task->title . '" list "' . ($task->list->name ?? '-') . '" ' . ($checklist->is_completed ? 'diselesaikan' : 'dibuka kembali');
         }
 
-        ActivityLog::create([
+        $log = ActivityLog::create([
             'user_id' => Auth::id(),
             'board_id' => $task->list->board_id,
             'action' => 'update_checklist',
@@ -75,6 +77,7 @@ class ChecklistController extends Controller
             'description' => $desc,
             'created_at' => now(),
         ]);
+        event(new \App\Events\ActivityLogged($log->id));
         broadcast(new ChecklistUpdated($checklist))->toOthers();
 
         return response()->json($checklist);
@@ -87,16 +90,17 @@ class ChecklistController extends Controller
         $task = $checklist->task;
         $itemText = $checklist->item_text;
         // Activity log
-        ActivityLog::create([
+        $log = ActivityLog::create([
             'user_id' => Auth::id(),
             'board_id' => $task->list->board_id,
             'action' => 'delete_checklist',
             'target_type' => Checklist::class,
             'target_id' => $id,
-            'description' => 'Checklist "' . $itemText . '" dihapus dari card "' . $task->title . '"',
+            'description' => 'Checklist "' . $itemText . '" dihapus dari card "' . $task->title . '" list "' . ($task->list->name ?? '-') . '"',
             'created_at' => now(),
         ]);
         $checklist->delete();
+        event(new \App\Events\ActivityLogged($log->id));
         broadcast(new ChecklistDeleted($id, $taskId))->toOthers();
         return response()->json(['success' => true]);
     }
