@@ -5,9 +5,10 @@
 <nav class="bg-white shadow-md border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4">
         <div class="flex justify-between h-16 items-center">
-            <span class="text-2xl font-extrabold text-blue-600 flex items-center gap-2">
-                📋 Wikra
-            </span>
+            <div class="flex items-center">
+                <img src="{{ asset('images/logo1.png') }}" alt="Logo" class="h-15 w-auto">
+                <span class="text-2xl font-extrabold text-blue-500">Wikra</span>
+            </div>
             <div class="flex items-center space-x-6">
                 <span class="text-sm text-gray-600">Hello, <span class="font-semibold text-indigo-600">{{ auth()->user()->name }}</span></span>
                 <button type="button" onclick="openConfirmLogoutModal()" class="text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-md shadow transition">Logout</button>

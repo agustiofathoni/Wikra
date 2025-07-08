@@ -3,7 +3,10 @@
 @section('content')
 <div class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="bg-white shadow-lg rounded-xl w-full max-w-sm p-8 text-center">
-        <h1 class="text-2xl font-bold mb-2">Wikra</h1>
+        <div class="flex justify-center items-center mb-2">
+            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-35 w-auto">
+        </div>
+        {{-- <h1 class="text-2xl font-bold mb-2">Wikra</h1> --}}
         <p class="mb-6 text-sm text-gray-600">Log in to continue</p>
 
         @if(session()->has('success'))
